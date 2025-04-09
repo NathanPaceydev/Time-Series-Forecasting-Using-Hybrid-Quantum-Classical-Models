@@ -65,3 +65,12 @@ Develop and compare classical and hybrid quantum-classical models for time serie
 
 - Parameter tuning and model architecture may evolve based on quantum integration needs
 - Maintain flexibility in model design to experiment with novel ideas during development
+
+
+---
+First get working hybrid
+Then compare to my thesis 
+maybe add more data 
+build classic ML
+compare hyper parameter's and setup to thesis
+iterate
