@@ -90,3 +90,9 @@ gradients	All zero in lstm and linear1 layers
 only linear2	Receives gradient and updates (after quantum layer)
 🧠 What this tells us:
 The quantum layer is completely ignoring its inputs
+
+So: the issue is gradient flow is broken between your loss and your quantum circuit.
+
+Fixed this through the function calll for inputs the data type of inputs and the type of activation function
+this combination ReLu especially was forcing data to zero
+
