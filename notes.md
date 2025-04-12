@@ -96,3 +96,4 @@ So: the issue is gradient flow is broken between your loss and your quantum circ
 Fixed this through the function calll for inputs the data type of inputs and the type of activation function
 this combination ReLu especially was forcing data to zero
 
+Go one by one on hyper-parameters -> 
