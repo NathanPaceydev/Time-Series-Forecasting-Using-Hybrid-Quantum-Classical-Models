@@ -11,28 +11,36 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 
 import random
-
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-
 from model_optimizer import train_and_evaluate
+import itertools
+
 # This script downloads stock data, processes it, and trains a model to predict future prices.
 
+experiment_notes = "Quantum sim: " # Notes for the experiment
 
 #-----------HYPER ParamETERS------------------
 # Use a window size (e.g., 20)
 WINDOW_SIZE = 20
 
 # ---- quantum circuit parameters ----------
+"""
 n_qubits = 2 # number of qubits
 q_depth  = 2 # number of layers
 n_rot_params = 3  # <--- number of rotation parameters per qubit (e.g. 1 for RY, 3 for Rot)
+"""
 
+## iterate over these parameters ##
+# Define hyperparameter ranges to iterate over
+n_qubit_options = [2, 3, 4, 5, 6]
+q_depth_options = [1, 2, 3, 4, 5, 6, 7]
+n_rot_params_options = [1, 2, 3]
 
 # wether to use quantum or classical model
-use_quantum = False
+use_quantum = True
 
 #---------- classical model parameters ----------
-experiment_notes = "TEST RUN FROM THE OPTIMIZER" # Notes for the experiment
+
 
 # === Model Config ===
 # Set model hyperparameters
@@ -44,7 +52,7 @@ output_size = 1
 
 learning_rate = 0.001
 
-num_epochs = 15
+num_epochs = 10
 use_dropout=False
 dropout_rate= 0.0 # 0.2 to 0.5 is common for LSTM/GRU
 use_layernorm=False 
@@ -174,31 +182,46 @@ test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 
-train_and_evaluate(
-    y_test_tensor=y_test_tensor,
-    train_loader=train_loader,
-    test_loader=test_loader,
-    X_train=X_train,
-    scaler=scaler,
-    input_size=input_size,
-    output_size=output_size,
-    hidden_size=hidden_size,
-    n_qubits=n_qubits,
-    q_depth=q_depth,
-    n_rot_params=n_rot_params,
-    ML_unit_type=ML_unit_type,
-    num_ML_layers=num_ML_layers,
-    use_quantum=use_quantum,
-    post_quantum_activation=post_quantum_activation,
-    skip_connection=skip_connection,
-    output_activation=output_activation,
-    use_dropout=use_dropout,
-    dropout_rate=dropout_rate,
-    use_layernorm=use_layernorm,
-    num_epochs=num_epochs,
-    early_stop_patience=early_stop_patience,
-    learning_rate=learning_rate,
-    tickers=tickers,
-    window_size=WINDOW_SIZE,
-    notes=experiment_notes
-)
+
+
+# Create combinations
+hyperparam_combinations = list(itertools.product(n_qubit_options, q_depth_options, n_rot_params_options))
+
+# Iterate over each combination
+for n_qubits, q_depth, n_rot_params in hyperparam_combinations:
+    if use_quantum :
+        added_notes = experiment_notes+f"\nGridSearch | Qubits={n_qubits}, Depth={q_depth}, RotParams={n_rot_params}"
+
+        
+        print(f"\n🔍 Experimenting with: {experiment_notes}"
+            f"\nQubits: {n_qubits}, Depth: {q_depth}, RotParams: {n_rot_params}")
+        
+    train_and_evaluate(
+        y_test_tensor=y_test_tensor,
+        train_loader=train_loader,
+        test_loader=test_loader,
+        X_train=X_train,
+        scaler=scaler,
+        input_size=input_size,
+        output_size=output_size,
+        hidden_size=hidden_size,
+        n_qubits=n_qubits,
+        q_depth=q_depth,
+        n_rot_params=n_rot_params,
+        ML_unit_type=ML_unit_type,
+        num_ML_layers=num_ML_layers,
+        use_quantum=use_quantum,
+        post_quantum_activation=post_quantum_activation,
+        skip_connection=skip_connection,
+        output_activation=output_activation,
+        use_dropout=use_dropout,
+        dropout_rate=dropout_rate,
+        use_layernorm=use_layernorm,
+        num_epochs=num_epochs,
+        early_stop_patience=early_stop_patience,
+        learning_rate=learning_rate,
+        tickers=tickers,
+        window_size=WINDOW_SIZE,
+        notes=added_notes
+    )
+

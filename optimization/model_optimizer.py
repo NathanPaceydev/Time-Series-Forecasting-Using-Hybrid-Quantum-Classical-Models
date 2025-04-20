@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
-
+import os
 import random
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error
@@ -403,8 +403,11 @@ def train_and_evaluate( y_test_tensor,train_loader, test_loader, X_train, scaler
             n_qubits, q_depth, n_rot_params = "-", "-", "-"
 
         # --- Load or initialize Excel sheet ---
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        log_path = os.path.join(script_dir, "qml_experiment_log.xlsx")
+        
         try:
-            df = pd.read_excel("qml_experiment_log.xlsx")
+            df = pd.read_excel(log_path)
             next_id = int(df["Experiment ID"].max()) + 1
         except (FileNotFoundError, ValueError, KeyError):
             df = pd.DataFrame()
@@ -455,9 +458,17 @@ def train_and_evaluate( y_test_tensor,train_loader, test_loader, X_train, scaler
 
         # --- Append and save ---
         df = pd.concat([df, pd.DataFrame([new_result])], ignore_index=True)
-        df.to_excel("qml_experiment_log.xlsx", index=False)
-        print(f"📋 Experiment logged as ID {next_id}")
+        
 
+        try:
+            df.to_excel(log_path, index=False)
+            print(f"📋 Experiment logged as ID {next_id}")
+            print("📂 Log file saved at:", os.path.abspath(log_path))
+        except Exception as e:
+            print(f"❌ Failed to write Excel log: {e}")
+        
+           
+        
     log_experiment(
         model=model,
         window_size=window_size,
