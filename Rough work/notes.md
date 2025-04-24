@@ -97,3 +97,4 @@ Fixed this through the function calll for inputs the data type of inputs and the
 this combination ReLu especially was forcing data to zero
 
 Go one by one on hyper-parameters -> 
+![alt text](image.png)

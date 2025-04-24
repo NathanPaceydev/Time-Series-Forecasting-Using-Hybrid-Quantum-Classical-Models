@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 import os
 import random
+import re
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
@@ -133,20 +134,31 @@ def train_and_evaluate( y_test_tensor,train_loader, test_loader, X_train, scaler
             if not any(unit in ML_unit_type for unit in ["LSTM", "GRU", "RNN"]):
                 raise ValueError(f"Unsupported ML unit type: {ML_unit_type}. Supported types: LSTM, GRU, RNN")
 
-            # Build stack
+            # Convert String to list of units
+            #sanitized_units = re.sub(r"[^a-zA-Z]", "-", ML_unit_type.upper())
+
+            # Example: ML_unit_type = "LSTM-GRU-LSTM"
+            unit_sequence = [u.strip().upper() for u in re.split(r"[^a-zA-Z0-9]+", ML_unit_type) if u.strip()]
+
+            # Build the sequence stack
             self.sequence_stack = nn.Sequential()
 
-            if "LSTM" in ML_unit_type:
-                self.sequence_stack.add_module("lstm", nn.LSTM(input_size=input_size, hidden_size=hidden_size,
-                                                            num_layers=num_ML_layers, batch_first=True))
-
-            if "GRU" in ML_unit_type:
-                self.sequence_stack.add_module("gru", nn.GRU(input_size=hidden_size, hidden_size=hidden_size,
-                                                            num_layers=1, batch_first=True))
-            if "RNN" in ML_unit_type:
-                self.sequence_stack.add_module("rnn", nn.RNN(input_size=hidden_size, hidden_size=hidden_size,
-                                                            num_layers=1, batch_first=True))
-            
+            for idx, unit in enumerate(unit_sequence):
+                layers = num_ML_layers if idx == 0 else 1  # Only first gets full depth
+                if unit == "LSTM":
+                    self.sequence_stack.add_module(f"lstm_{idx}", nn.LSTM(input_size=input_size, hidden_size=hidden_size,
+                                                                        num_layers=layers, batch_first=True))
+                    input_size = hidden_size  # Update input size for next unit
+                elif unit == "GRU":
+                    self.sequence_stack.add_module(f"gru_{idx}", nn.GRU(input_size=input_size, hidden_size=hidden_size,
+                                                                        num_layers=layers, batch_first=True))
+                    input_size = hidden_size
+                elif unit == "RNN":
+                    self.sequence_stack.add_module(f"rnn_{idx}", nn.RNN(input_size=input_size, hidden_size=hidden_size,
+                                                                        num_layers=layers, batch_first=True))
+                    input_size = hidden_size
+                else:
+                    raise ValueError(f"Unsupported unit: {unit}")
             
 
             # Linear layer to map LSTM output to quantum layer input size
