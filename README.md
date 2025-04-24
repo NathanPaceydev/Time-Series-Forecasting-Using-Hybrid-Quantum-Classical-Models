@@ -1,71 +1,42 @@
-# Time Series Forecasting Using Hybrid Quantum-Classical Models
-Assignment for Terra Quantum - Interview Assignment -
-Work by Nathan Pacey
+# Hybrid Quantum-Classical Neural Networks for Stock Price Forecasting
 
-## Assignment Description
+This project explores hybrid quantum-classical machine learning models for time series forecasting, using historical stock data as a challenging real-world benchmark. The architecture, training pipeline, and evaluation framework are fully modular, enabling rapid experimentation with classical and quantum components.
 
-Develop a time series forecasting model using a combination of classical machine learning models and quantum circuits. You have full freedom to choose any classical model (e.g., RNN, LSTM, Transformer, or ARIMA) and any quantum circuit architecture (e.g., variational quantum circuits).
+## 📁 Repository Structure
 
-You are tasked with building a hybrid quantum-classical model for time series forecasting. The model should combine a classical machine learning approach with a quantum circuit to enhance its predictive performance. The task aims to explore how quantum circuits can improve feature extraction, temporal pattern recognition, or sequence encoding when combined with classical models.
+| Folder/File                        | Description |
+|-----------------------------------|-------------|
+| `model/`                          | Final modular implementation of the forecasting model, including both quantum and classical variants. |
+| `optimization/`                   | Python scripts and logs used for sweeping hyperparameters and evaluating performance across architectures. |
+| `Rough work/`                     | Notes, debugging experiments, early architecture sketches, and analysis of model challenges. |
+| `Thesis American Style Stock options/` | Reference material and previous work used to inform the model design, from a bachelor’s thesis on option forecasting. |
+| `images/`                         | Visualizations of model architecture, training curves, and quantum circuit configurations. |
+| `Report/`                       | Project Documentation including a Report and Presentation |
 
----
+## 📈 Project Summary
 
-## 1. Coding Assignment
+This repository implements a hybrid forecasting model that combines:
 
-### 1.1 Data
+- **Classical recurrent units** (LSTM, GRU, RNN)
+- **Optional variational quantum circuit** layers via [PennyLane](https://pennylane.ai/)
+- A dynamic architecture that supports configuration of:
+  - Recurrent unit types and stacking order
+  - Quantum layer inclusion, qubit count, circuit depth, and gate structure
+  - Regularization (dropout, layer norm)
+  - Skip connections and activation functions
 
-- Choose a real-world or synthetic time series dataset (e.g., weather, financial, or sensor data).
-- Perform preprocessing steps such as normalization, scaling, and windowing to create training and test sets.
+The task was framed around forecasting normalized daily closing prices of AAPL, MSFT, and GOOGL using sliding windows of historical data.
 
-### 1.2 Model
+## 🔬 Methodology Highlights
 
-- Create a hybrid quantum neural network.
+- **Data Handling:**  
+  Historical stock data was fetched using the `yfinance` API (2015–2024). Prices were normalized per ticker using Min-Max scaling and transformed into time series sequences using a sliding window of 20 days. An 80/20 split ensured chronological integrity.
 
-### 1.3 Training & Evaluation
+- **Architecture:**  
+  The network is defined in `HybridQNN`, a PyTorch model that supports stacked recurrent layers and optional quantum circuits. Quantum inputs are linearly projected from the final hidden state and processed via a `qml.QNode`. Both classical and quantum outputs are merged via concatenation or addition.
 
-- Train the hybrid model and a comparable classical baseline on the dataset.
-- Evaluate the models using standard time series forecasting metrics.
+- **Training:**  
+  Models were trained using MSE loss and the Adam optimizer. Early stopping was applied (patience: 2–4 epochs). Performance metrics include MAE, RMSE, and average percentage error.
 
-### 1.4 Comparison
-
-- Compare the hybrid quantum-classical model’s performance with the classical baseline.
-- Experiment with different quantum circuit architectures, depths, and feature encoding strategies.
-
----
-
-## 2. Report
-
-You are expected to submit:
-
-### 2.1 Jupyter Notebook
-
-- Data preparation and preprocessing steps
-- Model implementation with detailed comments
-- Graphical evaluation of results (e.g., forecasts, metrics, and comparisons)
-
-### 2.2 Short Report (1–2 Pages)
-
-- Summary of selected models and quantum circuits
-- Key insights
-- Challenges faced
-- Possible improvements
-- Whether the quantum circuit contributed to performance improvements
-
----
-
-## 3. Presentation
-
-In your presentation, include:
-
-- Who you are
-- What you do
-- What your interests are
-- Whether you already have done research or have working experience
-
-This part should be covered in **max. 5 minutes**. The goal is simply to understand who is presenting.
-
----
-
-## Additional Note
-
-In terms of depth, it's best to look for a solution in the middle. Don’t spend too much time on the details, but rather share your **approach and ideas** for handling the task.
+- **Optimization:**  
+  Hyperparameter tuning was conducted classically first (dropout, activation, hidden size, layers, RNN types) to reduce quantum execution time. Sweeps were implemented in dedicated scripts under `optimization/`.
