@@ -11,7 +11,7 @@ This project explores hybrid quantum-classical machine learning models for time 
 | `Rough work/`                     | Notes, debugging experiments, early architecture sketches, and analysis of model challenges. |
 | `Thesis American Style Stock options/` | Reference material and previous work used to inform the model design, from a bachelor’s thesis on option forecasting. |
 | `images/`                         | Visualizations of model architecture, training curves, and quantum circuit configurations. |
-| `Report/`                       | Project Documentation including a Report and Presentation |
+| `Report/`                       | Project Documentation including a Report and Presentation Slides|
 
 ## 📈 Project Summary
 
